@@ -1,6 +1,7 @@
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use sscanf;
 
 #[derive(Debug)]
 struct Interval {
@@ -8,14 +9,10 @@ struct Interval {
     hi: i32,
 }
 
-fn parse_interval(s: &String) -> Interval {
-  let v: Vec<i32> = s.split("-").map(|v| v.parse().unwrap()).collect();
-  Interval { lo: v[0], hi: v[1] }
-}
-
 fn parse_line(s: &String) -> (Interval, Interval) {
-  let v: Vec<String> = s.split(",").map(|v| v.parse().unwrap()).collect();
-  (parse_interval(&v[0]), parse_interval(&v[1]))
+  let parsed = sscanf::sscanf!(s, "{}-{},{}-{}", i32, i32, i32, i32);
+  let (a_lo, a_hi, b_lo, b_hi) = parsed.unwrap();
+  (Interval { lo: a_lo, hi: a_hi}, Interval { lo: b_lo, hi: b_hi})
 }
 
 fn main() {

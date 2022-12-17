@@ -1,16 +1,12 @@
-use std::env;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc::get_input;
 use std::collections::HashMap;
 
 fn main() {
-    let path = env::args().nth(1).unwrap();
-    let file = File::open(path).expect("Can't open file");
-    let reader = BufReader::new(file);
+    let lines = get_input();
     let mut stack = Vec::<String>::new();
     let mut file_sizes = HashMap::<Vec::<String>, i32>::new();
-    for line in reader.lines() {
-        let words: Vec<String> = line.unwrap().split(" ").map(str::to_string).collect();
+    for line in lines {
+        let words: Vec<String> = line.split(" ").map(str::to_string).collect();
         if words[0] == "$" && words[1] == "cd" {
             if words[2] == "/" {
                 stack.clear();

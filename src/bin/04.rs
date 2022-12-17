@@ -1,6 +1,4 @@
-use std::env;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc::get_input;
 use sscanf;
 
 #[derive(Debug)]
@@ -16,12 +14,9 @@ fn parse_line(s: &String) -> (Interval, Interval) {
 }
 
 fn main() {
-  let path = env::args().nth(1).unwrap();
-  let file = File::open(path).expect("Can't open file");
-  let reader = BufReader::new(file);
+  let lines = get_input();
   let (mut count_1, mut count_2) = (0u32, 0u32);
-  for line in reader.lines() {
-    let line = line.unwrap();
+  for line in lines {
     let (p, q) = parse_line(&line);
     if (p.lo <= q.lo && p.hi >= q.hi) || (q.lo <= p.lo && q.hi >= p.hi) {
       count_1 += 1;

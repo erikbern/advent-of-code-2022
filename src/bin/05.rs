@@ -1,13 +1,8 @@
-use std::env;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc::get_input;
 use sscanf;
 
 fn main() {
-    let path = env::args().nth(1).unwrap();
-    let file = File::open(path).expect("Can't open file");
-    let reader = BufReader::new(file);
-    let lines: Vec<String> = reader.lines().map(|line| line.unwrap()).collect();
+    let lines = get_input();
     let index: usize = lines.iter().position(|line| line.len() == 0).unwrap();
     let rows = index - 1;
     let cols = (lines[0].len() + 1)/4;

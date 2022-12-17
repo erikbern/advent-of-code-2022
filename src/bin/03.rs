@@ -1,6 +1,4 @@
-use std::env;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc::get_input;
 use std::collections::HashSet;
 
 fn get_set(s: &str) -> HashSet<char> {
@@ -16,10 +14,7 @@ fn get_score(ch: &char) -> u32 {
 }
 
 fn main() {
-   let path = env::args().nth(1).unwrap();
-   let file = File::open(path).expect("Can't open file");
-   let reader = BufReader::new(file);
-   let lines: Vec<String> = reader.lines().map(|line| line.unwrap()).collect();
+   let lines = get_input();
    let mut sum_1 = 0u32;
    for line in &lines {
      let n = line.len();

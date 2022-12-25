@@ -6,6 +6,30 @@ fn parse_coords(s: &str) -> (i32, i32) {
     (x.parse::<i32>().unwrap(), y.parse::<i32>().unwrap())
 }
 
+fn sim(mut h: HashSet<(i32, i32)>, wall_y: Option<i32>) -> u32 {
+    for steps in 0u32.. {
+        let mut x = 500;
+        for y in 0.. {
+            if y >= 1000 {
+                return steps;
+            } else if h.contains(&(x, y)) {
+                return steps;
+            } else if wall_y.is_some() && y + 1 >= wall_y.unwrap() {
+                h.insert((x, y));
+                break;
+            } if !h.contains(&(x, y+1)) {
+            } else if !h.contains(&(x-1, y+1)) {
+                x = x - 1;
+            } else if !h.contains(&(x+1, y+1)) {
+                x = x + 1;
+            } else {
+                h.insert((x, y));
+                break;
+            }
+        }
+    }
+    unreachable!();
+}
 
 fn main() {
     let lines = get_input();
@@ -23,23 +47,7 @@ fn main() {
             }
         }
     }
-    let mut steps = 0u32;
-    'outer: loop {
-        let mut x = 500;
-        'inner: for y in 1.. {
-            if y >= 1000 {
-                break 'outer;
-            } if !h.contains(&(x, y+1)) {
-            } else if !h.contains(&(x-1, y+1)) {
-                x = x - 1;
-            } else if !h.contains(&(x+1, y+1)) {
-                x = x + 1;
-            } else {
-                h.insert((x, y));
-                break 'inner;
-            }
-        }
-        steps += 1;
-    }
-    println!("{}", steps);
+    println!("{}", sim(h.clone(), None));
+    let wall_y = h.iter().map(|(_x, y)| y).max().unwrap() + 2;
+    println!("{}", sim(h.clone(), Some(wall_y)));
 }

@@ -25,13 +25,13 @@ fn main() {
             cur
             .iter()
             .flat_map(|yx| dirs.iter().map(|dyx| (*yx, (yx.0 + dyx.0, yx.1 + dyx.1))))
-            .filter(|(yx, yx2)| yx2.0 >= 0 && yx2.0 < h && yx2.1 >= 0 && yx2.1 < w)
+            .filter(|(_yx, yx2)| yx2.0 >= 0 && yx2.0 < h && yx2.1 >= 0 && yx2.1 < w)
             .filter(|(yx, yx2)| {
                 let z = lines[yx.0 as usize][yx.1 as usize] as i32;
                 let z2 = lines[yx2.0 as usize][yx2.1 as usize] as i32;
                 z <= z2 + 1
             })
-            .map(|(yx, yx2)| yx2)
+            .map(|(_yx, yx2)| yx2)
             .filter(|yx2| !visited.contains_key(yx2))
         );
         next.iter().for_each(|yx| {

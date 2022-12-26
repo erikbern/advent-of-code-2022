@@ -1,17 +1,13 @@
 use aoc::get_input;
 use sscanf::sscanf;
 use std::collections::HashMap;
+use std::cmp::max;
 
 #[derive(Eq, PartialEq, Debug, Hash, Copy, Clone)]
 struct Position {
     taken: u64,
-    node: usize,
-}
-
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
-struct Score {
-    total_flow: i32,
-    flow: i32,
+    node_1: usize,
+    node_2: usize,
 }
 
 fn main() {
@@ -37,37 +33,66 @@ fn main() {
             graph[node_a].push(node_b);
         }
     }
+    let flows_sum: i32 = flows.iter().sum();
 
-    // Initialize data
-    let start: usize = str2int[&"AA".to_string()];
-    let mut best = HashMap::<(u64, usize), i32>::new();
-    let mut flows_h = HashMap::<u64, i32>::new();
-    best.insert((0, start), 0);
-    flows_h.insert(0u64, 0);
-
-    // Run algo
-    for t in 0..30 {
-        let mut best_new = HashMap::<(u64, usize), i32>::new();
-        let mut insert_maybe = |taken, node, total_flow| {
-            let cur_total_flow: i32 = *best_new.get(&(taken, node)).unwrap_or(&0);
-            if total_flow >= cur_total_flow {
-                best_new.insert((taken, node), total_flow);
-            }
-        };
-        for ((taken, node_a), total_flow) in &best {
-            let flow = flows_h[taken];
-            if taken & (1 << node_a) == 0 && flows[*node_a] > 0 {
-                let taken2 = taken | (1 << node_a);
-                flows_h.insert(taken2, flow + flows[*node_a]);
-                insert_maybe(taken2, *node_a, total_flow + flow);
-                
-            }
-            for node_b in &graph[*node_a] {
-                insert_maybe(*taken, *node_b, *total_flow + flow);
-            }
+    // Generate moves from a position
+    let get_moves = |taken: u64, node: usize| {
+        let mut moves = Vec::<(u64, usize)>::new();
+        if taken & (1 << node) == 0 && flows[node] > 0 {
+            let new_taken = taken | (1 << node);
+            moves.push((new_taken, node));
         }
-        best = best_new;
-        let max = best.values().max().unwrap();
-        println!("step {}: total number of states: {} best: {}", t, best.len(), max);
+        for node_b in &graph[node] {
+            moves.push((taken, *node_b));
+        }
+        moves
+    };
+
+    for mode in 0..2 {
+        // Initialize data
+        let start: usize = str2int[&"AA".to_string()];
+        let mut best = HashMap::<Position, i32>::new();
+        best.insert(Position { taken: 0u64, node_1: start, node_2: start }, 0);
+
+        // Run algo
+        let n_steps = if mode == 0 { 30 } else { 26 };
+        for t in 0..n_steps {
+            let mut best_new = HashMap::<Position, i32>::new();
+            let mut insert_or_update = |p, v| {
+                best_new.entry(p).and_modify(|ev| { *ev = max(v, *ev); } ).or_insert(v);
+            };
+            let mut best_lower_bound = 0;
+            for (pos, total_flow) in &best {
+                let flow: i32 = flows.iter().enumerate().map(|(i, f)| {
+                    if pos.taken & (1 << i) != 0 { *f } else { 0i32 }
+                }).sum();
+
+                let lower_bound = total_flow + (n_steps - 1 - t) * flow;
+                best_lower_bound = max(best_lower_bound, lower_bound);
+
+                let upper_bound = total_flow + (n_steps - 1 - t) * flows_sum;
+                if upper_bound < best_lower_bound {
+                    continue;
+                }
+
+                if mode == 0 {
+                    for (taken, node) in get_moves(pos.taken, pos.node_1) {
+                        let new_pos = Position { taken: taken, node_1: node, node_2: 0 };
+                        insert_or_update(new_pos, total_flow + flow);
+                    }
+                }
+                if mode == 1 {
+                    for (taken_1, node_1) in get_moves(pos.taken, pos.node_1) {
+                        for (taken_2, node_2) in get_moves(taken_1, pos.node_2) {
+                            let new_pos = Position { taken: taken_1 | taken_2, node_1: node_1, node_2: node_2 };
+                            insert_or_update(new_pos, total_flow + flow);
+                        }
+                    }
+                }
+            }
+            best = best_new;
+            let max = best.values().max().unwrap();
+            println!("step {}: total number of states: {} best: {}", t, best.len(), max);
+        }
     }
 }

@@ -4,12 +4,9 @@ use regex::Regex;
 use std::cmp::min;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-struct R(i32, i32, i32, i32); // ore, clay, obsidian, geode
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 struct S {
-    res: R,
-    rob: R,
+    res: [i32; 4],
+    rob: [i32; 4],
 }
 
 struct Input {
@@ -22,8 +19,8 @@ struct Input {
 }
 
 fn search(i: &Input, n_steps: i32) -> i32 {
-    let res1 = R(0, 0, 0, 0);
-    let rob1 = R(1, 0, 0, 0);
+    let res1 = [0, 0, 0, 0];
+    let rob1 = [1, 0, 0, 0];
     let s = S { res: res1, rob: rob1 };
     let mut m = HashSet::<S>::new();
     m.insert(s);
@@ -33,43 +30,43 @@ fn search(i: &Input, n_steps: i32) -> i32 {
         let mut best_lower_bound = 0;
         for s in &m {
             let n_steps_left = n_steps - step - 1;
-            let lower_bound = s.res.3 + s.rob.3 * n_steps_left;
-            let upper_bound = s.res.3 + s.rob.3 * n_steps_left + n_steps_left * (n_steps_left - 1) / 2;
+            let lower_bound = s.res[3] + s.rob[3] * n_steps_left;
+            let upper_bound = s.res[3] + s.rob[3] * n_steps_left + n_steps_left * (n_steps_left - 1) / 2;
             if lower_bound > best_lower_bound {
                 best_lower_bound = lower_bound;
             } else if upper_bound < best_lower_bound {
                 continue;
             }
-            let res_n = R(s.res.0 + s.rob.0, s.res.1 + s.rob.1, s.res.2 + s.rob.2, s.res.3 + s.rob.3);
-            if s.res.0 >= i.ore_ore {
+            let res_n = [s.res[0] + s.rob[0], s.res[1] + s.rob[1], s.res[2] + s.rob[2], s.res[3] + s.rob[3]];
+            if s.res[0] >= i.ore_ore {
                 m_new.insert(S {
-                    res: R(res_n.0 - i.ore_ore, res_n.1, res_n.2, res_n.3),
-                    rob: R(s.rob.0 + 1, s.rob.1, s.rob.2, s.rob.3),
+                    res: [res_n[0] - i.ore_ore, res_n[1], res_n[2], res_n[3]],
+                    rob: [s.rob[0] + 1, s.rob[1], s.rob[2], s.rob[3]],
                 });
             }
-            if s.res.0 >= i.cla_ore {
+            if s.res[0] >= i.cla_ore {
                 m_new.insert(S {
-                    res: R(res_n.0 - i.cla_ore, res_n.1, res_n.2, res_n.3),
-                    rob: R(s.rob.0, s.rob.1 + 1, s.rob.2, s.rob.3),
+                    res: [res_n[0] - i.cla_ore, res_n[1], res_n[2], res_n[3]],
+                    rob: [s.rob[0], s.rob[1] + 1, s.rob[2], s.rob[3]],
                 });
             }
-            if s.res.0 >= i.obs_ore && s.res.1 >= i.obs_cla {
+            if s.res[0] >= i.obs_ore && s.res[1] >= i.obs_cla {
                 m_new.insert(S {
-                    res: R(res_n.0 - i.obs_ore, res_n.1 - i.obs_cla, res_n.2, res_n.3),
-                    rob: R(s.rob.0, s.rob.1, s.rob.2 + 1, s.rob.3),
+                    res: [res_n[0] - i.obs_ore, res_n[1] - i.obs_cla, res_n[2], res_n[3]],
+                    rob: [s.rob[0], s.rob[1], s.rob[2] + 1, s.rob[3]],
                 });
             }
-            if s.res.0 >= i.geo_ore && s.res.2 >= i.geo_obs {
+            if s.res[0] >= i.geo_ore && s.res[2] >= i.geo_obs {
                 m_new.insert(S {
-                    res: R(res_n.0 - i.geo_ore, res_n.1, res_n.2 - i.geo_obs, res_n.3),
-                    rob: R(s.rob.0, s.rob.1, s.rob.2, s.rob.3 + 1),
+                    res: [res_n[0] - i.geo_ore, res_n[1], res_n[2] - i.geo_obs, res_n[3]],
+                    rob: [s.rob[0], s.rob[1], s.rob[2], s.rob[3] + 1],
                 });
             }
             m_new.insert(S {res: res_n, rob: s.rob });
         }
         m = m_new;
-    }
-    m.iter().map(|s| s.res.3).max().unwrap()
+    }   
+    m.iter().map(|s| s.res[3]).max().unwrap()
 }
 
 fn main() {

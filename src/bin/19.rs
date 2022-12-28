@@ -40,43 +40,32 @@ fn search(i: &Input, n_steps: i32) -> i32 {
             } else if upper_bound < best_lower_bound {
                 continue;
             }
-            let mut ok_idle = false;
             let res_n = R(s.res.0 + s.rob.0, s.res.1 + s.rob.1, s.res.2 + s.rob.2, s.res.3 + s.rob.3);
             if s.res.0 >= i.ore_ore {
                 m_new.insert(S {
                     res: R(res_n.0 - i.ore_ore, res_n.1, res_n.2, res_n.3),
                     rob: R(s.rob.0 + 1, s.rob.1, s.rob.2, s.rob.3),
                 });
-            } else {
-                ok_idle = true;
             }
             if s.res.0 >= i.cla_ore {
                 m_new.insert(S {
                     res: R(res_n.0 - i.cla_ore, res_n.1, res_n.2, res_n.3),
                     rob: R(s.rob.0, s.rob.1 + 1, s.rob.2, s.rob.3),
                 });
-            } else {
-                ok_idle = true;
             }
             if s.res.0 >= i.obs_ore && s.res.1 >= i.obs_cla {
                 m_new.insert(S {
                     res: R(res_n.0 - i.obs_ore, res_n.1 - i.obs_cla, res_n.2, res_n.3),
                     rob: R(s.rob.0, s.rob.1, s.rob.2 + 1, s.rob.3),
                 });
-            } else {
-                ok_idle = true;
             }
             if s.res.0 >= i.geo_ore && s.res.2 >= i.geo_obs {
                 m_new.insert(S {
                     res: R(res_n.0 - i.geo_ore, res_n.1, res_n.2 - i.geo_obs, res_n.3),
                     rob: R(s.rob.0, s.rob.1, s.rob.2, s.rob.3 + 1),
                 });
-            } else {
-                ok_idle = true;
             }
-            if ok_idle {
-                m_new.insert(S {res: res_n, rob: s.rob });
-            }
+            m_new.insert(S {res: res_n, rob: s.rob });
         }
         m = m_new;
     }

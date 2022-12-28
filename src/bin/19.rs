@@ -17,6 +17,12 @@ struct Recipe {
     cost: M,
 }
 
+#[derive(Debug)]
+struct Blueprint {
+    id: i32,
+    recipes: Vec<Recipe>,
+}
+
 fn add(a: &M, b: &M) -> M {
     [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]]
 }
@@ -72,35 +78,33 @@ fn search(recipes: &Vec<Recipe>, n_steps: i32) -> i32 {
 
 fn main() {
     let regex = Regex::new(r"\d+").unwrap();
-    let mut inputs = Vec::<(i32, Vec<Recipe>)>::new();
-
-    for line in get_input() {
+    let blueprints: Vec<Blueprint> = get_input().iter().map(|line| {
         let ints: Vec<i32> = regex.find_iter(&line).map(|item| item.as_str().parse::<i32>().unwrap()).collect();
-        let b_id: i32 = ints[0];
+        let id: i32 = ints[0];
         let recipes = vec![
             Recipe {material: 0, cost: [ints[1], 0, 0, 0]},
             Recipe {material: 1, cost: [ints[2], 0, 0, 0]}, 
             Recipe {material: 2, cost: [ints[3], ints[4], 0, 0]},
             Recipe {material: 3, cost: [ints[5], 0, ints[6], 0]},
         ];
-        inputs.push((b_id, recipes));
-    }
+        Blueprint {id, recipes}
+    }).collect();
 
     // Part 1
     let mut total_quality_level = 0i32;
-    for (b_id, recipes) in &inputs {
-        let n_geos = search(&recipes, 24);
-        println!("{}: {}", b_id, n_geos);
-        total_quality_level += b_id * n_geos;
+    for blueprint in &blueprints {
+        let n_geos = search(&blueprint.recipes, 24);
+        println!("{}: {}", blueprint.id, n_geos);
+        total_quality_level += blueprint.id * n_geos;
     }
     println!("-> {}", total_quality_level);
 
     // Part 2
     let mut product = 1i32;
-    let k = min(inputs.len(), 3);
-    for (b_id, recipes) in &inputs[..k] {
-        let n_geos = search(&recipes, 32);
-        println!("{}: {}", b_id, n_geos);
+    let k = min(blueprints.len(), 3);
+    for blueprint in &blueprints[..k] {
+        let n_geos = search(&blueprint.recipes, 32);
+        println!("{}: {}", blueprint.id, n_geos);
         product *= n_geos;
     }
     println!("-> {}", product);

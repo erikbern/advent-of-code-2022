@@ -19,7 +19,6 @@ fn get_blocked(blizzards: &Vec<Blizzard>, step: i32, h: i32, w: i32) -> HashSet<
     blocked
 }
 
-
 fn get_attainable(prev_attainable: &HashSet<YX>, blocked: &HashSet<YX>, h: i32, w: i32) -> HashSet<YX> {
     let mut next_attainable = HashSet::<YX>::new();
     let dirs = vec![(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)];
@@ -36,6 +35,18 @@ fn get_attainable(prev_attainable: &HashSet<YX>, blocked: &HashSet<YX>, h: i32, 
         }
     }
     next_attainable
+}
+
+fn go(start: YX, goal: YX, blizzards: &Vec<Blizzard>, start_step: usize, h: i32, w: i32) -> usize {
+    let mut attainable = HashSet::<YX>::new();
+    attainable.insert(start);
+    let mut step = start_step;
+    while !attainable.contains(&goal) {
+        step += 1;
+        let blocked = get_blocked(&blizzards, step as i32, h, w);
+        attainable = get_attainable(&attainable, &blocked, h, w);
+    }
+    step
 }
 
 fn main() {
@@ -59,17 +70,12 @@ fn main() {
             }
         }
     }
-    // println!("{:?}", blizzards);
-    let mut attainable = HashSet::<YX>::new();
-    attainable.insert((0, 1));
-    let mut step = 0;
-    while !attainable.contains(&(h+1, w)) {
-        step += 1;
-        println!(".. {}", step);
-        let blocked = get_blocked(&blizzards, step as i32, h, w);
-        // println!("step {}: {:?}", step, blocked);
-        attainable = get_attainable(&attainable, &blocked, h, w);
-        // println!("step {}: {:?}", step, attainable);
-    }
+    let start: YX = (0, 1);
+    let goal: YX = (h + 1, w);
+    let step = go(start, goal, &blizzards, 0, h, w);
+    println!("-> {}", step);
+    let step = go(goal, start, &blizzards, step, h, w);
+    println!("-> {}", step);
+    let step = go(start, goal, &blizzards, step, h, w);
     println!("-> {}", step);
 }
